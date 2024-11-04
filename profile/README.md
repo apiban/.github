@@ -4,7 +4,6 @@ APIBAN helps prevent unwanted SIP traffic by identifying addresses of known bad 
 
 **NOTE:** If you are looking to protect your PBX or SIP server without programming, you should use the [**APIBAN** client](https://github.com/apiban/apiban-client-go) to automatically block traffic. **This is the easiest and quickest way to implement APIBAN data and block traffic.**
 
-<<<<<<< HEAD
 Visit <https://www.apiban.org/> for more information.
 
 **APIBAN is made possible by the generosity of our [sponsors](https://apiban.org/doc.html#sponsors).**
@@ -275,6 +274,4 @@ Help is provided by LOD (<https://www.lod.com>) and an APIBAN room ([#apiban:mat
 ## Warranty
 
 ABIBAN data is provided in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-=======
 Example integrations: [github.com/apiban/apiban](https://github.com/apiban/apiban)
->>>>>>> f90ed46161dce7a3dae34efe5152c18507f523f2
