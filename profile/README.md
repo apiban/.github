@@ -54,10 +54,10 @@ The full **APIBAN** API documentation is available at <https://apiban.org/doc.ht
 
 ### Blocking Banned IPs
 
-A loop is used to cycle through the banned IPs. On first download, this list can be quite large and `max_while_loops` will need to be large enough to handle the list.
+A loop is used to cycle through the banned IPs. On first download, this list can be **quite large** and `max_while_loops` will need to be large enough to handle the list.
 
 ```
-max_while_loops=250
+max_while_loops=600
 ```
 
 You will need to load the following modules (if not already loaded):
@@ -91,34 +91,29 @@ route[APIBAN] {
 
 	// replace MYAPIKEY with your apiban.org API key.
 	$var(apikey) = "MYAPIKEY";
-	$var(apiget) = "https://apiban.org/api/" + $var(apikey) + "/banned/" + $sht(apibanctl=>ID);
-
-	xlog("L_INFO","APIBAN: Sending API request to $var(apiget)\n");
-	http_client_query("$var(apiget)", "$var(banned)");
-
-	// if we dont get a 200 OK from the webserver we will log and exit
-	if($rc!=200) {
-		xlog("L_INFO","APIBAN: Non 200 response. $var(banned)\n");
-		xlog("L_INFO","APIBAN: $sht(apibanctl=>blocks) attacks blocked since $(Tb{s.ftime,%Y-%m-%d %H:%M:%S})\n");
-		exit;
+	$var(count) = 0;
+	$var(apiget) = "https://apiban.org/api/get";
+	$var(headers) = "Authorization: Bearer " + $var(apikey) + "\r\nContent-Type: application/json";
+	jansson_set("string", "set", "all", "$var(post)"); #-- choose all, sip, or http
+	jansson_set("string", "id", "$sht(apibanctl=>ID)", "$var(post)");
+	xinfo("$cfg(route) - api $var(apiget) post $var(post) headers $var(headers)");
+	http_client_query("$var(apiget)", "$var(post)", "$var(headers)", "$var(banned)");
+	if ($rc!=200) {
+    xinfo("$cfg(route) - $var(banned)\n");
+		return;
 	}
 
-	// lets loop through the ipaddresses we received from our API request
-	$var(count) = 0;
 	jansson_array_size("ipaddress", $var(banned), "$var(size)");
 	while($var(count) < $var(size)) {
-		jansson_get("ipaddress[$var(count)]", $var(banned), "$var(blockaddr)");
-		// add the blocked ipaddress to the apiban htable and log
-		$sht(apiban=>$var(blockaddr)) = 1;
-		xlog("L_INFO","APIBAN: Adding block ipaddress[$var(count)] == $var(blockaddr)\n");
-
+		jansson_get("ipaddress[$var(count)]", $var(banned), "$var(v)");
+		$sht(apiban=>$var(v)) = 1;
 		$var(count) = $var(count) + 1;
 	}
 
-	// lets get our control ID and use it for incremental downloads
-	jansson_get("ID", $var(banned), "$var(apiid)");
-	xlog("L_INFO","APIBAN: New ID is $var(apiid)\n");
-	$sht(apibanctl=>ID) = $var(apiid);
+	jansson_get("ID", $var(banned), "$var(w)");
+	xinfo("$cfg(route) - Blocked $var(count) addresses. New ID: $var(w)\n");
+	$sht(apibanctl=>ID) = $var(w);
+  return;
 }
 ```
 
